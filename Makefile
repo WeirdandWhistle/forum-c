@@ -7,8 +7,10 @@ LIB=lib
 CFILES=$(shell (find -name 'src/*.c'))
 OFILES=$(subst .c,.o,$(CFILES))
 
+LIBOFILES=$(shell (find -name 'lib/*.o'))
+
 $(TARGET): $(LIB)/sqlite3.o $(LIB)/mongoose.o $(OFILES) 
-	$(CC) $(CFLAGS) -o $(TARGET) $(OFILES)
+	$(CC) $(CFLAGS) -o $(TARGET) $(OFILES) $(LIBOFILES)
 
 
 # sqlite3.o : pull-depss
@@ -27,18 +29,11 @@ $(LIB)/mongoose.c : pull-deps
 	$(CC) $(CFLAGS) -c -o $@ $<
 
 pull-deps:
-	cd $(SRC) && sh pull_deps.sh
-
-build: $(TARGET)
-	./$(TARGET) build
-
-serve: $(TARGET)
-	./$(TARGET) serve
-
+	cd $(LIB) && sh pull_deps.sh
 clean: 
 	rm -f $(OFILES) $(TARGET)
 clean-deps:
-	rm -f $(shell find -name $(LIB)/*.o)
+	rm -f $(TMP)
 full-clean: clean clean-deps
 	rm $(LIB)/mongoose.c $(LIB)/mongoose.h $(LIB)/sqlite3.c $(LIB)/sqlite3.h
 

@@ -1,6 +1,6 @@
 #!/bin/bash
 
-if [ -f "sqlite3.c" ]; then
+if [ -f "sqlite3.c" ] && [-f "sqlite3.h"] && [-f "mongoose.c"] && [-f "mongoose.h"]; then
     echo "DEPS proably exist. Exiting..."
     exit 0
 fi
