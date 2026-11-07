@@ -1,13 +1,13 @@
 TARGET=main
 CC=gcc
-CFLAGS=-Wall -Wextra -O3
+CFLAGS=-Wall -Wextra
 SRC=src
 LIB=lib
 
-CFILES=$(shell (find -name 'src/*.c'))
+CFILES=$(shell (find src -name '*.c'))
 OFILES=$(subst .c,.o,$(CFILES))
 
-LIBOFILES=$(shell (find -name 'lib/*.o'))
+LIBOFILES=$(shell (find lib -name '*.o'))
 
 $(TARGET): $(LIB)/sqlite3.o $(LIB)/mongoose.o $(OFILES) 
 	$(CC) $(CFLAGS) -o $(TARGET) $(OFILES) $(LIBOFILES)
@@ -33,8 +33,8 @@ pull-deps:
 clean: 
 	rm -f $(OFILES) $(TARGET)
 clean-deps:
-	rm -f $(TMP)
+	rm -f $(LIBOFILES)
 full-clean: clean clean-deps
-	rm $(LIB)/mongoose.c $(LIB)/mongoose.h $(LIB)/sqlite3.c $(LIB)/sqlite3.h
+	rm -f $(LIB)/mongoose.c $(LIB)/mongoose.h $(LIB)/sqlite3.c $(LIB)/sqlite3.h
 
 
