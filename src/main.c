@@ -6,7 +6,7 @@ int load_secret(uint8_t* secret);
 int main(int argc, char* argv[]){
     uint8_t secret[SECRET_LENGTH] = {0};
     int rc = load_secret(secret);
-    if(rc || !secret){
+    if(rc){
         return 1;
     }
 

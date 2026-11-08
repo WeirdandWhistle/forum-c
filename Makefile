@@ -1,6 +1,6 @@
 TARGET=main
 CC=gcc
-CFLAGS=-Wall -Wextra
+CFLAGS=-Wall -Wextra -Wno-unused-parameter
 SRC=src
 LIB=lib
 
