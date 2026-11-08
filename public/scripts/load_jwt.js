@@ -1,6 +1,15 @@
 const jwt = getCookie("auth_token");
 if(!jwt){
-
+    fetch("/api/auth/anon").then((res)=>{
+        return res.json();
+    }).then((json)=>{
+        console.log(json);
+        if(!json.ok){
+            alert(`faild to load anon JWT: ${json.error}`);
+        } else {
+            setCookie("auth_token", json.data.jwt, 90);
+        }
+    });
 }
 
 

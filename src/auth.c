@@ -18,14 +18,14 @@ int auth_endpoint(struct mg_connection* c, struct mg_http_message* hm, uint8_t* 
         char jwt_buf[4096] = {0};
         size_t n = mg_jwt_sign_hs256(&opts, jwt_buf, sizeof(jwt_buf));
         if(n == 0){
-            mg_http_reply(c, 500, GLOBAL_HEADERS CONTENT_JSON, "{\"ok\":false,\"error\":\"JWT signing faild\"}");
+            mg_http_reply(c, 500, GLOBAL_HEADERS CONTENT_JSON NO_CACHE, "{\"ok\":false,\"error\":\"JWT signing faild\"}");
             return 500;
         }
 
-        mg_http_reply(c, 200, GLOBAL_HEADERS CONTENT_JSON, "{\"ok\":true,\"data\":{\"jwt\":\"%s\"}}", jwt_buf);
+        mg_http_reply(c, 200, GLOBAL_HEADERS CONTENT_JSON NO_CACHE, "{\"ok\":true,\"data\":{\"jwt\":\"%s\"}}", jwt_buf);
         return 200;
     } else {
-        mg_http_reply(c, 501, GLOBAL_HEADERS CONTENT_JSON, "{\"ok\":false,\"error\":\"Not implemneted\"}");
+        mg_http_reply(c, 501, GLOBAL_HEADERS CONTENT_JSON NO_CACHE, "{\"ok\":false,\"error\":\"Not implemneted\"}");
         return 501;
     }
 }

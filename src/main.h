@@ -17,6 +17,8 @@
     #define JWT_ISS "forum.whynotjava.net"
 
 
+
+    #define NO_CACHE "Cache-Control: no-cache, max-age=3600\r\n"
     #define CONTENT_JSON "Content-Type: application/json\r\n"
     #define GLOBAL_HEADERS ""
 
