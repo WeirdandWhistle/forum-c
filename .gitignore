@@ -6,3 +6,4 @@ lib/*.zip
 main
 
 sql.db
+jwt_secret

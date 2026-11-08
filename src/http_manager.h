@@ -3,6 +3,6 @@
 
     #include "main.h"
 
-    int start_http_server(sqlite3* db);
+    int start_http_server(sqlite3* db, uint8_t* secret);
 
 #endif

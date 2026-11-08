@@ -37,4 +37,5 @@ clean-deps:
 full-clean: clean clean-deps
 	rm -f $(LIB)/mongoose.c $(LIB)/mongoose.h $(LIB)/sqlite3.c $(LIB)/sqlite3.h
 
-
+run: $(TARGET)
+	./$(TARGET)
