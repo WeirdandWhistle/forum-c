@@ -1,4 +1,8 @@
-lib/*.o
+
 lib/*.c
 lib/*.h
 lib/*.zip
+*.o
+main
+
+sql.db

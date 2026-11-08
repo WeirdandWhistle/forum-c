@@ -24,8 +24,8 @@ $(LIB)/mongoose.c : pull-deps
 .c :
 	$(shell (echo '.c!'))
 
-.o : .c
-	$(shell (echo '.o!'))
+%.o : %.c %.h
+# 	$(shell (echo '.o!'))
 	$(CC) $(CFLAGS) -c -o $@ $<
 
 pull-deps:
