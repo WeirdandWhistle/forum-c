@@ -4,9 +4,30 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Page</title>
+    <link href="/stylesheet.css" rel="stylesheet">
 </head>
 <body>
+    <div class="wing" style="left: 0;">
+        <button onclick="openSection('create-board')">Create new Board</button>
+        <hr>
+    </div>
     
-    <script src="/scripts/admin-page.js"></script>
+
+    <div id="left-wing" class="wing" style="right: 0;">
+        <div id="create-board" style="display: none;">
+            <span>Name</span> <input placeholder="Example" id="board-name"><br>
+            <span>Path</span> <input pattern="/[a-b0-9]+" placeholder="/example" id="board-path"><br>
+            <span>Rules <span style="font-size: 0.7rem;">(mark down)</span></span><br>
+            <textarea style="height: 5rem; width: 90%;" id="board-rules"></textarea><br>
+            <br>
+            <button onclick="createBoard();">Submit</button><br>
+            <span class="error-msg" id="board-err"></span>
+        </div>
+    </div>
+
 </body>
+
+
+<script src="/scripts/admin-page-jwt.js"></script>
+<script src="/scripts/admin-page.js"></script>
 </html>

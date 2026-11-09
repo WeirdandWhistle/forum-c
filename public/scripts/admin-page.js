@@ -1,54 +1,24 @@
-let jwt = getCookie("auth_token");
-async function get_jwt(){
-    try {
-        if(!jwt || JSON.parse(jwt.split(".")[1]).admin == false){
-            jwt = prompt("Please enter your admin jwt:");
-            setCookie("auth_token", jwt, 90);
-        }    
-    } catch (error) {
-        jwt = prompt("Please enter your admin jwt:");
-        setCookie("auth_token", jwt, 90);
+function openSection(id){
+    const c = document.getElementById('left-wing').children;
+    console.log(c);
+    for(let i = 0; i < c.length; i++){
+        c[i].style.display = 'none';
     }
-    
-    verify_jwt();
+    document.getElementById(id).style.display = 'block';
 }
-get_jwt();
+function createBoard(){
+    const err = document.getElementById('board-err');
+    const name = document.getElementById('board-name').value;
+    const path = document.getElementById('board-path').value;
+    const rules = document.getElementById('board-rules').value;
 
-async function verify_jwt() {
-    const res = await fetch("/api/verify/"+jwt);
-    const json = await res.json();
-    if(json.ok == false) {
-        alert("Error: "+json.error);
-        return;
-    }
-    if(json.data.valid == false){
-        alert("JWT is invalid. Please try again");
-        get_jwt();
-        return;
+    if(!path.match(/\/[a-b0-9]/)){
+        err.innerHTML = "ERROR: Path is not vaild. Should be of the form: '/{path}'."
+    } else if(name.trim().length == 0){
+        err.innerHTML = "ERROR: Name must exist."
+    } else {
+        err.innerHTML = "";
     }
 
-    console.log("call other things");
-}
-
-// https://www.w3schools.com/js/js_cookies.asp
-function getCookie(cname) {
-  let name = cname + "=";
-  let decodedCookie = decodeURIComponent(document.cookie);
-  let ca = decodedCookie.split(';');
-  for(let i = 0; i <ca.length; i++) {
-    let c = ca[i];
-    while (c.charAt(0) == ' ') {
-      c = c.substring(1);
-    }
-    if (c.indexOf(name) == 0) {
-      return c.substring(name.length, c.length);
-    }
-  }
-  return "";
-}
-function setCookie(cname, cvalue, exdays) {
-  const d = new Date();
-  d.setTime(d.getTime() + (exdays*24*60*60*1000));
-  let expires = "expires="+ d.toUTCString();
-  document.cookie = cname + "=" + cvalue + ";" + expires + ";path=/";
+    const res = fetch("/api");
 }

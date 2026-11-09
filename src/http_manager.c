@@ -1,13 +1,16 @@
 #include "http_manager.h"
 #include "auth.h"
+#include "boards.h"
 #include <time.h>
 
 static void ev_handler(struct mg_connection* c, int ev, void* ev_data);
 
 uint8_t* jwt_secret;
-int start_http_server(sqlite3* db, uint8_t* secret){
+sqlite3* db;
+int start_http_server(sqlite3* db_param, uint8_t* secret){
 
     jwt_secret = secret;
+    db = db_param;
 
     struct mg_mgr mgr;
     mg_mgr_init(&mgr);
@@ -18,7 +21,7 @@ int start_http_server(sqlite3* db, uint8_t* secret){
 
     return 0;
 }
-
+int authenticated_routing(struct mg_conection* c, struct mg_http_message* hm, struct mg_str claim_buf);
 static void ev_handler(struct mg_connection* c, int ev, void* ev_data){
     if(ev == MG_EV_HTTP_MSG){
         struct mg_http_message* hm = (struct mg_http_message*) ev_data;
@@ -59,7 +62,8 @@ static void ev_handler(struct mg_connection* c, int ev, void* ev_data){
                 }
                 // more stuff
 
-
+                status_code = authenticated_routing(c, hm, mg_str(claim_buf));
+                if(status_code != -1) goto end;
 
                 mg_http_reply(c, 404, GLOBAL_HEADERS HOUR_CACHE CONTENT_JSON, "{\"ok\":false,\"error\":\"Not found.\"}");
                 status_code = 404;
@@ -75,5 +79,19 @@ static void ev_handler(struct mg_connection* c, int ev, void* ev_data){
         end:
 
         if(status_code != -1) printf("stauts code: %d\n", status_code);
+    }
+}
+
+int authenticated_routing(struct mg_conection* c, struct mg_http_message* hm, struct mg_str claim_buf){
+    struct mg_str caps[5];
+    bool is_admin = false;
+    mg_json_get_bool(claim_buf, "$.admin", &is_admin);
+
+    if(mg_match(hm->uri, mg_str("/api/board"), caps) && mg_strcasecmp(hm->method, mg_str("POST")) == 0){ // ADMIN endpoint: posting/creating a new board 
+        if(!is_admin){
+            mg_http_reply(c, 401, GLOBAL_HEADERS NO_CACHE CONTENT_JSON, "{\"ok\":false,\"error\":\"Unauthorized. This is an admin endpoint.\"}\n");
+            return 401;
+        }
+        return post_board(c, hm->body);
     }
 }

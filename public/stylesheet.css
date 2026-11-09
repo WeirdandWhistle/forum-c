@@ -1,10 +1,65 @@
 :root{
     --base-color: #222;
     --text-color: #929292;
+
+    --error-red: rgb(202, 15, 15);
+
+    --hr-contrast: #808080;
+
+    --button-blue: #099dd7;
+    --button-blue-hover: #45b2dd;
 }
 
-
+hr{
+    color: var(--hr-contrast);
+    width: 100%;
+}
 body {
     background-color: var(--base-color);
     color: var(--text-color);
+}
+
+button{
+    background-color: var(--button-blue);
+    outline: none;
+    border: none;
+    font-size: 1.1rem;
+    border-radius: 5px;
+    padding: 0.3rem;
+}
+button:hover{
+    background-color: var(--button-blue-hover);
+}
+input{
+    padding: 0.35rem;
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+    border-radius: 15px;
+    background-color: transparent;
+    color: var(--text-color);
+    border: var(--text-color) 1px solid;
+    outline: none;
+}
+textarea{
+    background-color: transparent;
+    border: var(--text-color) 1px solid;
+    outline: none;
+    color: var(--text-color);
+}
+
+
+
+
+/* class */
+.wing {
+    padding: 0.5rem;
+    position: absolute;
+    top: 0;
+    width: 50%;
+    height: 100%;
+    box-sizing: border-box;
+    border: var(--hr-contrast) 1px solid;
+}
+.error-msg{
+    color: var(--error-red);
 }
