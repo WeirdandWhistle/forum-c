@@ -7,3 +7,4 @@ main
 
 sql.db
 jwt_secret
+admin_jwt.txt

@@ -1,5 +1,6 @@
 #include "http_manager.h"
 #include "auth.h"
+#include <time.h>
 
 static void ev_handler(struct mg_connection* c, int ev, void* ev_data);
 
@@ -21,7 +22,7 @@ int start_http_server(sqlite3* db, uint8_t* secret){
 static void ev_handler(struct mg_connection* c, int ev, void* ev_data){
     if(ev == MG_EV_HTTP_MSG){
         struct mg_http_message* hm = (struct mg_http_message*) ev_data;
-        struct mg_str caps[16];
+        struct mg_str caps[5];
 
         int status_code = -1;
 
@@ -31,10 +32,47 @@ static void ev_handler(struct mg_connection* c, int ev, void* ev_data){
             mg_http_reply(c, 200, GLOBAL_HEADERS, "%s", buf);
         } else if(mg_match(hm->uri, mg_str("/api/auth/*"), caps)){
             status_code = auth_endpoint(c, hm, jwt_secret, caps[0]);
+        } else if(mg_match(hm->uri, mg_str("/api/verify/*"), caps)){
+            status_code = verify_endpoint(c, hm, jwt_secret, caps[0]);
         }
 
-        struct mg_http_serve_opts opts = {.root_dir = FILE_PATH "public", .page404 = FILE_PATH "public/error404.txt", .enable_dir_listing = true};
-        mg_http_serve_dir(c, hm, &opts);
+        if(mg_match(hm->uri, mg_str("/api#"), caps)){
+            struct mg_str* auth = mg_http_get_header(hm, "Authorization");
+            struct mg_str jwt_token[2];
+            
+            if(auth != NULL && mg_match(mg_str("Bearer *"), *auth, jwt_token)){
+                char claim_buf[1024] = {0};
+
+                struct mg_jwt_opts opts = {.secret = mg_str_n((char*)jwt_secret, SECRET_LENGTH)};
+                size_t n = mg_jwt_verify_hs256(jwt_token[0], &opts, claim_buf, sizeof(claim_buf)-1);
+                if(n == 0){
+                    mg_http_reply(c, 401, GLOBAL_HEADERS NO_CACHE CONTENT_JSON, "{\"ok\":false,\"error\":\"Unauthorized. Invaild signature.\"}");
+                    status_code = 401;
+                    goto end;
+                }
+
+                long exp = mg_json_get_long(mg_str(claim_buf), "$.exp", 0);
+                if(exp < time(NULL)){
+                    mg_http_reply(c, 401, GLOBAL_HEADERS NO_CACHE CONTENT_JSON, "{\"ok\":false,\"error\":\"Unauthorized. Past experation.\"}");
+                    status_code = 401;
+                    goto end;
+                }
+                // more stuff
+
+
+
+                mg_http_reply(c, 404, GLOBAL_HEADERS HOUR_CACHE CONTENT_JSON, "{\"ok\":false,\"error\":\"Not found.\"}");
+                status_code = 404;
+            }
+            mg_http_reply(c, 401, GLOBAL_HEADERS NO_CACHE CONTENT_JSON, "{\"ok\":false,\"error\":\"Unauthorized. Invaild or no Bearer token.\"}");
+            status_code = 401;
+            goto end;
+        } else {
+            struct mg_http_serve_opts opts = {.root_dir = FILE_PATH "public", .page404 = FILE_PATH "public/error404.txt", .enable_dir_listing = true};
+            mg_http_serve_dir(c, hm, &opts);
+        }
+
+        end:
 
         if(status_code != -1) printf("stauts code: %d\n", status_code);
     }

@@ -1,11 +1,17 @@
 #include "main.h"
 #include "init_db.h"
 #include "http_manager.h"
+#include "auth.h"
 
 int load_secret(uint8_t* secret);
 int main(int argc, char* argv[]){
     uint8_t secret[SECRET_LENGTH] = {0};
     int rc = load_secret(secret);
+    if(rc){
+        return 1;
+    }
+
+    rc = generate_admin_jwt(secret);
     if(rc){
         return 1;
     }

@@ -11,6 +11,7 @@
 
     #define DATABASE_FILE FILE_PATH "sql.db"
     #define SECRET_FILE FILE_PATH "jwt_secret"
+    #define ADMIN_JWT_FILE FILE_PATH "admin_jwt.txt"
     #define SECRET_LENGTH 32
     #define KEY_ID_HEADER "default"
     #define JWT_EXP 60 * 60 * 24 * 90
@@ -18,7 +19,9 @@
 
 
 
-    #define NO_CACHE "Cache-Control: no-cache, max-age=3600\r\n"
+    #define NO_CACHE "Cache-Control: no-cache, max-age=0\r\n"
+    #define HOUR_CACHE "Cache-Control: public, max-age=3600\r\n"
+    #define DAY_CACHE "Cache-Control: public, max-age=86400\r\n"
     #define CONTENT_JSON "Content-Type: application/json\r\n"
     #define GLOBAL_HEADERS ""
 
