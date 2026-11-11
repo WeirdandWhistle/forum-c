@@ -25,4 +25,9 @@
     #define CONTENT_JSON "Content-Type: application/json\r\n"
     #define GLOBAL_HEADERS ""
 
+
+    #define RESERVED_PATHS ["posts", "post", "user", "users", "dm", "create", "delete", "message", "messages", "rss", "api", "authorize", "token", "cdn", "admin", "scripts", "src"]
+
+
+    #define ARRAY_LEN(arr) do sizeof(arr) / sizeof(arr[0])
 #endif

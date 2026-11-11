@@ -1,6 +1,6 @@
 TARGET=main
 CC=gcc
-CFLAGS=-Wall -Wextra -Wno-unused-parameter
+CFLAGS=-Wall -Wextra -Wno-unused-parameter -faddress=sanatize
 SRC=src
 LIB=lib
 

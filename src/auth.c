@@ -11,7 +11,7 @@ int auth_endpoint(struct mg_connection* c, struct mg_http_message* hm, uint8_t* 
         unsigned long exp = time(NULL) + JWT_EXP;
         unsigned long iat = time(NULL);
 
-        char claim_buf[1024];
+        char claim_buf[1024] = {0};
         mg_snprintf(claim_buf, sizeof(claim_buf), "{\"iss\":\"%s\",\"sub\":%lu,\"exp\":%lu,\"iat\":%lu,\"admin\":false}", JWT_ISS, sub, exp, iat);
 
         struct mg_jwt_opts opts = {.kid = mg_str(KEY_ID_HEADER), .secret = secret, .claims = mg_str(claim_buf)};
@@ -37,7 +37,7 @@ int verify_endpoint(struct mg_connection* c, struct mg_http_message* hm, uint8_t
 bool verify_token(uint8_t* jwt_secret, struct mg_str jwt){
     struct mg_str secret = {.buf = (char*) jwt_secret, .len = SECRET_LENGTH};
     struct mg_jwt_opts opts = {.secret = secret};
-    char buf[1024];
+    char buf[1024] = {0};
     size_t n = mg_jwt_verify_hs256(jwt, &opts, buf, sizeof(buf)-1);
     if(n == 0){
         return false;
@@ -51,7 +51,7 @@ bool verify_token(uint8_t* jwt_secret, struct mg_str jwt){
 int generate_admin_jwt(uint8_t* jwt_secret){
     unsigned long exp = time(NULL) + JWT_EXP;
     unsigned long iat = time(NULL);
-    char claim_buf[1024];
+    char claim_buf[1024] = {0};
     mg_snprintf(claim_buf, sizeof(claim_buf), "{\"iss\":\"%s\",\"sub\":\"admin\",\"exp\":%lu,\"iat\":%lu,\"admin\":true}", JWT_ISS, exp, iat);
 
     struct mg_str secret = {.buf = (char*) jwt_secret, .len = SECRET_LENGTH};

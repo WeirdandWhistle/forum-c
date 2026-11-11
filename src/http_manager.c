@@ -25,12 +25,12 @@ int authenticated_routing(struct mg_conection* c, struct mg_http_message* hm, st
 static void ev_handler(struct mg_connection* c, int ev, void* ev_data){
     if(ev == MG_EV_HTTP_MSG){
         struct mg_http_message* hm = (struct mg_http_message*) ev_data;
-        struct mg_str caps[5];
+        struct mg_str caps[5] = {0};
 
         int status_code = -1;
 
         if(mg_match(hm->uri, mg_str("/api/jwt"), caps)){
-            char buf[128];
+            char buf[128] = {0};
             mg_base64_encode(jwt_secret, SECRET_LENGTH, buf, sizeof(buf));
             mg_http_reply(c, 200, GLOBAL_HEADERS, "%s", buf);
         } else if(mg_match(hm->uri, mg_str("/api/auth/*"), caps)){
@@ -41,7 +41,7 @@ static void ev_handler(struct mg_connection* c, int ev, void* ev_data){
 
         if(mg_match(hm->uri, mg_str("/api#"), caps)){
             struct mg_str* auth = mg_http_get_header(hm, "Authorization");
-            struct mg_str jwt_token[2];
+            struct mg_str jwt_token[2] = {0};
             
             if(auth != NULL && mg_match(mg_str("Bearer *"), *auth, jwt_token)){
                 char claim_buf[1024] = {0};
@@ -83,7 +83,7 @@ static void ev_handler(struct mg_connection* c, int ev, void* ev_data){
 }
 
 int authenticated_routing(struct mg_conection* c, struct mg_http_message* hm, struct mg_str claim_buf){
-    struct mg_str caps[5];
+    struct mg_str caps[5] = {0};
     bool is_admin = false;
     mg_json_get_bool(claim_buf, "$.admin", &is_admin);
 
@@ -92,6 +92,6 @@ int authenticated_routing(struct mg_conection* c, struct mg_http_message* hm, st
             mg_http_reply(c, 401, GLOBAL_HEADERS NO_CACHE CONTENT_JSON, "{\"ok\":false,\"error\":\"Unauthorized. This is an admin endpoint.\"}\n");
             return 401;
         }
-        return post_board(c, hm->body);
+        return post_board(c, db, hm->body);
     }
 }
