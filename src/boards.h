@@ -4,6 +4,7 @@
     #include "main.h"
 
     int post_board(struct mg_connection* c, sqlite3* db, struct mg_str json);
+    int get_boards(struct mg_connection* c, sqlite3* db);
 
     bool is_all_digit_or_low_case(char* str);
     bool is_all_digit_or_low_case_mg(struct mg_str str);

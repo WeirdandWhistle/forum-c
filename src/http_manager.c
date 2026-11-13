@@ -12,6 +12,8 @@ int start_http_server(sqlite3* db_param, uint8_t* secret){
     jwt_secret = secret;
     db = db_param;
 
+    mg_log_set(MG_LL_NONE);
+
     struct mg_mgr mgr;
     mg_mgr_init(&mgr);
     mg_http_listen(&mgr, "http://0.0.0.0:8000", ev_handler, NULL);
@@ -21,7 +23,7 @@ int start_http_server(sqlite3* db_param, uint8_t* secret){
 
     return 0;
 }
-int authenticated_routing(struct mg_conection* c, struct mg_http_message* hm, struct mg_str claim_buf);
+int authenticated_routing(struct mg_connection* c, struct mg_http_message* hm, struct mg_str claim_buf);
 static void ev_handler(struct mg_connection* c, int ev, void* ev_data){
     if(ev == MG_EV_HTTP_MSG){
         struct mg_http_message* hm = (struct mg_http_message*) ev_data;
@@ -29,11 +31,7 @@ static void ev_handler(struct mg_connection* c, int ev, void* ev_data){
 
         int status_code = -1;
 
-        if(mg_match(hm->uri, mg_str("/api/jwt"), caps)){
-            char buf[128] = {0};
-            mg_base64_encode(jwt_secret, SECRET_LENGTH, buf, sizeof(buf));
-            mg_http_reply(c, 200, GLOBAL_HEADERS, "%s", buf);
-        } else if(mg_match(hm->uri, mg_str("/api/auth/*"), caps)){
+        if(mg_match(hm->uri, mg_str("/api/auth/*"), caps)){
             status_code = auth_endpoint(c, hm, jwt_secret, caps[0]);
         } else if(mg_match(hm->uri, mg_str("/api/verify/*"), caps)){
             status_code = verify_endpoint(c, hm, jwt_secret, caps[0]);
@@ -43,7 +41,9 @@ static void ev_handler(struct mg_connection* c, int ev, void* ev_data){
             struct mg_str* auth = mg_http_get_header(hm, "Authorization");
             struct mg_str jwt_token[2] = {0};
             
-            if(auth != NULL && mg_match(mg_str("Bearer *"), *auth, jwt_token)){
+            // MG_PRINT_STR((*auth));
+
+            if(auth != NULL && mg_match(*auth, mg_str("Bearer *"), jwt_token)){
                 char claim_buf[1024] = {0};
 
                 struct mg_jwt_opts opts = {.secret = mg_str_n((char*)jwt_secret, SECRET_LENGTH)};
@@ -60,8 +60,7 @@ static void ev_handler(struct mg_connection* c, int ev, void* ev_data){
                     status_code = 401;
                     goto end;
                 }
-                // more stuff
-
+                
                 status_code = authenticated_routing(c, hm, mg_str(claim_buf));
                 if(status_code != -1) goto end;
 
@@ -78,11 +77,11 @@ static void ev_handler(struct mg_connection* c, int ev, void* ev_data){
 
         end:
 
-        if(status_code != -1) printf("stauts code: %d\n", status_code);
+        // if(status_code != -1) printf("stauts code: %d\n", status_code);
     }
 }
 
-int authenticated_routing(struct mg_conection* c, struct mg_http_message* hm, struct mg_str claim_buf){
+int authenticated_routing(struct mg_connection* c, struct mg_http_message* hm, struct mg_str claim_buf){
     struct mg_str caps[5] = {0};
     bool is_admin = false;
     mg_json_get_bool(claim_buf, "$.admin", &is_admin);
@@ -93,5 +92,8 @@ int authenticated_routing(struct mg_conection* c, struct mg_http_message* hm, st
             return 401;
         }
         return post_board(c, db, hm->body);
+    } else if(mg_match(hm->uri, mg_str("/api/board"), caps) && mg_strcasecmp(hm->method, mg_str("GET")) == 0){
+        return get_boards(c, db);
     }
+    return -1;
 }

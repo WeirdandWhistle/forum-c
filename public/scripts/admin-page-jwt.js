@@ -28,7 +28,7 @@ async function verify_jwt() {
         return;
     }
 
-    console.log("call other things");
+    sessionStorage.setItem('jwt', jwt);
 }
 
 function decodeBase64URL(base64){

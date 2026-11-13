@@ -6,11 +6,11 @@ function openSection(id){
     }
     document.getElementById(id).style.display = 'block';
 }
-function createBoard(){
+async function createBoard(){
     const err = document.getElementById('board-err');
     const name = document.getElementById('board-name').value;
     const path = document.getElementById('board-path').value;
-    const rules = document.getElementById('board-rules').value;
+    const rules = document.getElementById('board-rules').value ?? '';
 
     if(!path.match(/\/[a-b0-9]/)){
         err.innerHTML = "ERROR: Path is not vaild. Should be of the form: '/{path}'."
@@ -20,5 +20,28 @@ function createBoard(){
         err.innerHTML = "";
     }
 
-    const res = fetch("/api");
+    const res = await fetch("/api/board", {
+        method: 'POST',
+        headers: {
+            'Authorization' : `Bearer ${sessionStorage.getItem('jwt')}`
+        },
+        body:JSON.stringify({
+            name: name,
+            path: path,
+            rules: rules,
+        }),
+    });
+
+    try {
+
+        const json = await res.json();
+        if(!json.ok){
+            err.innerHTML = `Error ${res.status}: ${json.error}`;
+        } else {
+            err.innerHTML = `<span style="color: green;">Success!</span>`;
+        }
+        
+    } catch (error) {
+        alert("An error occured: "+error);
+    } 
 }
