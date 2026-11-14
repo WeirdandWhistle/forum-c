@@ -27,7 +27,9 @@
     #define GLOBAL_HEADERS ""
 
 
-    #define RESERVED_PATHS {"posts", "post", "user", "users", "dm", "create", "delete", "message", "messages", "rss", "api", "authorize", "token", "cdn", "admin", "scripts", "src"}
+    #define RESERVED_PATHS {"posts", "post", "user", "users", "dm", "create", "delete", "message",\
+        "messages", "rss", "api", "authorize", "token", "cdn", "admin", "scripts", "src", "board", \
+        "boards", "id", "login", "auth", "signup", "invite", "docs", "doc"}
 
 
     #define ARRAY_LEN(arr) sizeof(arr) / sizeof(arr[0])

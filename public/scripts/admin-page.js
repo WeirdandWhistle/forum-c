@@ -17,7 +17,7 @@ async function createBoard(){
     const note = document.getElementById('board-note').value ?? '';
 
     let good = true;
-    if(!path.match(/\/[a-b0-9]/)){
+    if(!path.match(/\/[a-z0-9]/)){
         err.innerHTML = "ERROR: Path is not vaild. Should be of the form: '/{path}'."
         good = false;
     } else if(name.trim().length == 0){
@@ -52,6 +52,8 @@ async function createBoard(){
             err.innerHTML = `Error ${res.status}: ${json.error}`;
         } else {
             err.innerHTML = `<span style="color: green;">Success!</span>`;
+
+            insertBoard(json.data.id, path.replaceAll('/',''), name, note, rules, 'board-insert-spot');
         }
         
     } catch (error) {

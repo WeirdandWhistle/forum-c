@@ -109,6 +109,7 @@ int post_board(struct mg_connection* c, sqlite3* db, struct mg_str json){
     if(sqlite3_bind_text(post_board_stmt, 2, name, -1, NULL) != SQLITE_OK) goto clean_up_binding_posting;
     if(sqlite3_bind_text(post_board_stmt, 3, path + path_offset, -1, NULL) != SQLITE_OK) goto clean_up_binding_posting;
     if(sqlite3_bind_text(post_board_stmt, 4, rules, -1, NULL) != SQLITE_OK) goto clean_up_binding_posting;
+    if(sqlite3_bind_text(post_board_stmt, 5, note, -1, NULL) != SQLITE_OK) goto clean_up_binding_posting;
     
     goto post_post_binding;
     clean_up_binding_posting:
@@ -125,7 +126,7 @@ int post_board(struct mg_connection* c, sqlite3* db, struct mg_str json){
         mg_http_reply(c, rc, GLOBAL_HEADERS CONTENT_JSON NO_CACHE, "{\"ok\":false,\"error\":\"SQLite failed to step while posting: %M\"}\n", MG_ESC(sqlite3_errmsg(db)));
     } else {
         rc = 200;
-        mg_http_reply(c, rc, GLOBAL_HEADERS CONTENT_JSON NO_CACHE, "{\"ok\":true,\"data\":{}}\n");
+        mg_http_reply(c, rc, GLOBAL_HEADERS CONTENT_JSON NO_CACHE, "{\"ok\":true,\"data\":{\"id\":%ld}}\n", id);
     }
 
     sqlite3_finalize(post_board_stmt);
@@ -134,7 +135,7 @@ int post_board(struct mg_connection* c, sqlite3* db, struct mg_str json){
     return rc;
 }
 int get_boards(struct mg_connection* c, sqlite3* db){
-    static char get_boards_sql[] = "SELECT json_group_array(json_object('id', id, 'path', path, 'name', name, 'rules', rules)) FROM board;";
+    static char get_boards_sql[] = "SELECT json_group_array(json_object('id', id, 'path', path, 'name', name, 'rules', rules, 'note', note)) FROM board;";
     sqlite3_stmt* get_boards_stmt;
     int rc = sqlite3_prepare_v2(db, get_boards_sql, sizeof(get_boards_sql), &get_boards_stmt, NULL);
     if(rc != SQLITE_OK){
