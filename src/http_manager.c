@@ -2,13 +2,16 @@
 #include "auth.h"
 #include "boards.h"
 #include <time.h>
+#include <signal.h>
 
 static void ev_handler(struct mg_connection* c, int ev, void* ev_data);
+void handle_sigquit(int num);
 
 uint8_t* jwt_secret;
 sqlite3* db;
 int hot_paths_len;
 struct mg_str* hot_paths;
+uint8_t safe_shutdown = 0;
 int start_http_server(sqlite3* db_param, uint8_t* secret){
 
     jwt_secret = secret;
@@ -21,16 +24,23 @@ int start_http_server(sqlite3* db_param, uint8_t* secret){
     }
     hot_paths_len = loaded_board_paths_len(hot_paths);
 
-    mg_log_set(MG_LL_NONE);
 
+    signal(SIGQUIT, handle_sigquit);
+
+    mg_log_set(MG_LL_NONE);
     struct mg_mgr mgr;
     mg_mgr_init(&mgr);
     mg_http_listen(&mgr, "http://0.0.0.0:8000", ev_handler, NULL);
     for(;;){
         mg_mgr_poll(&mgr, 1000);
+        if(safe_shutdown) break;
     }
 
+    mg_mgr_free(&mgr);
+
     free_loaded_board_paths(hot_paths);
+
+    printf("HTTP safely closed\n");
 
     return 0;
 }
@@ -105,4 +115,8 @@ int authenticated_routing(struct mg_connection* c, struct mg_http_message* hm, s
         return get_boards(c, db);
     }
     return -1;
+}
+void handle_sigquit(int num){
+    safe_shutdown = 1;
+    printf("Shutdown request recived. Will shutdown when request's finish proccesssing.\n");
 }
