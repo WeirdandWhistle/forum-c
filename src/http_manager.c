@@ -31,6 +31,7 @@ int start_http_server(sqlite3* db_param, uint8_t* secret){
     struct mg_mgr mgr;
     mg_mgr_init(&mgr);
     mg_http_listen(&mgr, "http://0.0.0.0:8000", ev_handler, NULL);
+    printf("HTTP server started press CTRL + \\ to close safely.\n");
     for(;;){
         mg_mgr_poll(&mgr, 1000);
         if(safe_shutdown) break;
@@ -118,5 +119,5 @@ int authenticated_routing(struct mg_connection* c, struct mg_http_message* hm, s
 }
 void handle_sigquit(int num){
     safe_shutdown = 1;
-    printf("Shutdown request recived. Will shutdown when request's finish proccesssing.\n");
+    printf("\nShutdown request recived. Will shutdown when request's finish proccesssing.\n");
 }

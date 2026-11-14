@@ -206,14 +206,14 @@ struct mg_str* hot_load_board_paths(sqlite3* db){
     int rc = sqlite3_exec(db, get_boards_sql, &hot_load_boards_callback, &paths, NULL);
     if(rc) printf("SQLite exec error: %s\n", sqlite3_errmsg(db));
     if(!paths) printf("Paths is still null.\n");
-    else {
-        int i = 0;
-        while(paths[i].buf != NULL){
+    // else {
+    //     int i = 0;
+    //     while(paths[i].buf != NULL){
             
-            printf("Loaded i=%d: '/%s'\n", i, paths[i].buf);
-            i++;
-        }
-    }
+    //         printf("Loaded i=%d: '/%s'\n", i, paths[i].buf);
+    //         i++;
+    //     }
+    // }
     return rc == 0 ? paths : NULL;
 }
 void free_loaded_board_paths(struct mg_str* paths){
