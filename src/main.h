@@ -17,7 +17,7 @@
     #define JWT_EXP 60 * 60 * 24 * 90
     #define JWT_ISS "forum.whynotjava.net"
 
-
+    #define ENABLE_DEFAULT_BOARDS
 
     #define NO_CACHE "Cache-Control: no-cache, max-age=0\r\n"
     #define HOUR_CACHE "Cache-Control: public, max-age=3600\r\n"
@@ -33,7 +33,5 @@
 
 
     #define ARRAY_LEN(arr) sizeof(arr) / sizeof(arr[0])
-
-
     #define MG_PRINT_STR(str) for(size_t iiiiiiiiii  = 0; iiiiiiiiii < str.len; iiiiiiiiii++){printf("%c",str.buf[iiiiiiiiii]);} printf("\n");
 #endif

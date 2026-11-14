@@ -12,12 +12,6 @@ LIBOFILES=$(shell (find lib -name '*.o'))
 $(TARGET): $(LIB)/sqlite3.o $(LIB)/mongoose.o $(OFILES) 
 	$(CC) $(CFLAGS) -o $(TARGET) $(OFILES) $(LIBOFILES)
 
-
-# sqlite3.o : pull-depss
-# 	$(CC) $(CFLAGS) -c -o sqlite3.o sqlite3.c
-# mongoose.o : pull-deps
-# 	$(CC) $(CFLAGS) -c -o mongoose.o mongoose.c
-
 $(LIB)/sqlite3.c : pull-deps
 $(LIB)/mongoose.c : pull-deps
 
@@ -25,7 +19,6 @@ $(LIB)/mongoose.c : pull-deps
 	$(shell (echo '.c!'))
 
 %.o : %.c %.h
-# 	$(shell (echo '.o!'))
 	$(CC) $(CFLAGS) -c -o $@ $<
 
 pull-deps:
