@@ -119,14 +119,23 @@ int post_board(struct mg_connection* c, sqlite3* db, struct mg_str json){
     return rc;
 }
 int get_boards(struct mg_connection* c, sqlite3* db){
-    // static char[] = get_boards_sql = "SELECT id, path, name, rules FROM board;";
-    // sqlite3_stmt* get_boards_stmt;
-    // int rc = sqlite3_prepare_v2(db, get_boards_sql, sizeof(get_boards_sql), &get_boards_stmt, NULL);
-    // if(rc != SQLITE_OK){
-    //     mg_http_reply(c, 500, GLOBAL_HEADERS CONTENT_JSON NO_CACHE, "{\"ok\":false,\"error\"\"\"}")
-    // }
+    static char get_boards_sql[] = "SELECT json_group_array(json_object('id', id, 'path', path, 'name', name, 'rules', rules)) FROM board;";
+    sqlite3_stmt* get_boards_stmt;
+    int rc = sqlite3_prepare_v2(db, get_boards_sql, sizeof(get_boards_sql), &get_boards_stmt, NULL);
+    if(rc != SQLITE_OK){
+        mg_http_reply(c, 500, GLOBAL_HEADERS CONTENT_JSON NO_CACHE, "{\"ok\":false,\"error\":\"SQLite error while preparing: %M\"}\n", MG_ESC(sqlite3_errmsg(db)));
+    }
 
-    mg_http_reply(c, 200, "", "{\"data\":\"error: %M\"}\n", MG_ESC("\"\" '' stuff super hard to escape and suck \""));
+    rc = sqlite3_step(get_boards_stmt);
+    if(rc != SQLITE_ROW){
+        mg_http_reply(c, 500, GLOBAL_HEADERS CONTENT_JSON, NO_CACHE, "{\"ok\":false,\"error\":\"SQLite failed while getting row: %M\"}\n", MG_ESC(sqlite3_errmsg(db)));
+        sqlite3_finalize(get_boards_stmt);
+        return 500;
+    }
+
+    mg_http_reply(c, 200, GLOBAL_HEADERS CONTENT_JSON HOUR_CACHE, "{\"ok\":true,\"data\":%s}\n", sqlite3_column_text(get_boards_stmt, 0));
+
+    sqlite3_finalize(get_boards_stmt);
     return 200;
 }
 

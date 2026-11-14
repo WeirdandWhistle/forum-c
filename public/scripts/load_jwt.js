@@ -12,6 +12,8 @@ if(!jwt){
     });
 }
 
+sessionStorage.setItem('jwt', getCookie('auth_token'));
+
 
 
 // https://www.w3schools.com/js/js_cookies.asp

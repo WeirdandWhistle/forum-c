@@ -1,5 +1,6 @@
 :root{
     --base-color: #222;
+    --base-contrast: #333;
     --text-color: #929292;
 
     --error-red: rgb(202, 15, 15);
@@ -45,6 +46,34 @@ textarea{
     border: var(--text-color) 1px solid;
     outline: none;
     color: var(--text-color);
+}
+board{
+    cursor: pointer;
+    border-top: var(--text-color) 1px solid;
+    border-bottom: var(--text-color) 1px solid;
+
+    /* border: var(--text-color) 1px solid; */
+
+    height: 5rem;
+    width: 20rem;
+    position: relative;
+    display: block;
+    padding: 0.2rem;
+}
+board:hover{
+    background-color: var(--base-contrast);
+}
+board h3{
+    position: relative;
+    top: 0;
+    margin: 0;
+}
+.board-array{
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-evenly;
+    align-items: center;
+    row-gap: 1rem;
 }
 
 
