@@ -47,6 +47,23 @@ textarea{
     outline: none;
     color: var(--text-color);
 }
+@keyframes spinny {
+    0%{
+        transform: rotate(0deg);
+    }
+    100%{
+        transform: rotate(360deg);
+    }
+}
+spinner{
+    border-radius: 50%;
+    aspect-ratio: 1 / 1;
+    width: 1rem;
+    /* background-color: var(--hr-contrast); */
+    border-top: 2px var(--button-blue) solid;
+    animation: spinny 1s linear 0s infinite forwards;
+    display: none;
+}
 board{
     cursor: pointer;
     border-top: var(--text-color) 1px solid;

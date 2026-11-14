@@ -7,17 +7,29 @@ function openSection(id){
     document.getElementById(id).style.display = 'block';
 }
 async function createBoard(){
+    const spinner = document.getElementById('board-spinner');
+    spinner.style.display = 'inline-block';
+
     const err = document.getElementById('board-err');
     const name = document.getElementById('board-name').value;
     const path = document.getElementById('board-path').value;
     const rules = document.getElementById('board-rules').value ?? '';
+    const note = document.getElementById('board-note').value ?? '';
 
+    let good = true;
     if(!path.match(/\/[a-b0-9]/)){
         err.innerHTML = "ERROR: Path is not vaild. Should be of the form: '/{path}'."
+        good = false;
     } else if(name.trim().length == 0){
         err.innerHTML = "ERROR: Name must exist."
+        good = false;
     } else {
         err.innerHTML = "";
+    }
+
+    if(!good){
+        spinner.style.display = 'none';
+        return;
     }
 
     const res = await fetch("/api/board", {
@@ -29,6 +41,7 @@ async function createBoard(){
             name: name,
             path: path,
             rules: rules,
+            note: note,
         }),
     });
 
@@ -43,5 +56,6 @@ async function createBoard(){
         
     } catch (error) {
         alert("An error occured: "+error);
-    } 
+    }
+    spinner.style.display = 'none';
 }

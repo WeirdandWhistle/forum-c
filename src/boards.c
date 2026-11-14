@@ -75,18 +75,31 @@ int post_board(struct mg_connection* c, sqlite3* db, struct mg_str json){
     sqlite3_finalize(check_path_and_name_stmt);
 
     char* rules = mg_json_get_str(json, "$.rules");
+    if(rules == NULL){
+        mg_http_reply(c, 400, GLOBAL_HEADERS CONTENT_JSON NO_CACHE, "{\"ok\":false,\"error\":\"rules are null.\"}\n");
+        return 400;
+    }
     // int rules_len = strlen(rules);
+
+    char* note = mg_json_get_str(json, "$.note");
+    if(note == NULL){
+        mg_free(rules);
+        mg_http_reply(c, 400, GLOBAL_HEADERS CONTENT_JSON NO_CACHE, "{\"ok\":false,\"error\":\"note are null.\"}\n");
+        return 400;
+    }
+
 
     // finish the SQLite call to post a board
     int64_t id;
     mg_random(&id, sizeof(id));
     id = llabs(id);
 
-    static char post_board_sql[] = "INSERT INTO board (id, name, path, rules) VALUES (?, ?, ?, ?);";
+    static char post_board_sql[] = "INSERT INTO board (id, name, path, rules, note) VALUES (?, ?, ?, ?, ?);";
     sqlite3_stmt* post_board_stmt;
     rc = sqlite3_prepare_v2(db, post_board_sql, sizeof(post_board_sql), &post_board_stmt, NULL);
     if(rc != SQLITE_OK){
         mg_free(rules);
+        mg_free(note);
         mg_http_reply(c, 500, GLOBAL_HEADERS CONTENT_JSON NO_CACHE, "{\"ok\":false,\"error\":\"SQLite failed to prepare stmt for posting: %M\"}\n", MG_ESC(sqlite3_errmsg(db)));
         return 500;
     }
@@ -101,6 +114,7 @@ int post_board(struct mg_connection* c, sqlite3* db, struct mg_str json){
     clean_up_binding_posting:
     mg_http_reply(c, 500, GLOBAL_HEADERS CONTENT_JSON NO_CACHE, "{\"ok\":false,\"error\":\"SQLite failed to bind while posting: %M\"}\n", MG_ESC(sqlite3_errmsg(db)));
     mg_free(rules);
+    mg_free(note);
     sqlite3_finalize(post_board_stmt);
     return 500;
     post_post_binding:
@@ -116,6 +130,7 @@ int post_board(struct mg_connection* c, sqlite3* db, struct mg_str json){
 
     sqlite3_finalize(post_board_stmt);
     mg_free(rules);
+    mg_free(note);
     return rc;
 }
 int get_boards(struct mg_connection* c, sqlite3* db){
