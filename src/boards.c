@@ -155,6 +155,76 @@ int get_boards(struct mg_connection* c, sqlite3* db){
     return 200;
 }
 
+
+int hot_load_boards_callback(void* void_ptr, int col_num, char** texts, char** names){
+    struct mg_str** storage_ptr = ((struct mg_str**) void_ptr);
+
+    struct mg_str* paths;
+    int paths_len = 0;
+    if(*storage_ptr == NULL){
+        // printf("mallocing\n");
+        paths = malloc(2 * sizeof(struct mg_str));
+        paths_len = 1;
+        if(!paths) return 1;
+    } else {
+        paths = *storage_ptr;
+        while(paths[paths_len].buf != NULL){
+            paths_len++;
+        }
+        paths_len += 1; // for new path to push on top
+        // printf("reallocing with new paths_len of %d\n", paths_len);
+        paths = realloc(paths, (paths_len + 1) * sizeof(struct mg_str));
+    }   
+     
+    int path_len = strlen(texts[0]);
+    paths[paths_len-1].len = path_len;
+    paths[paths_len-1].buf = malloc(path_len+1);
+    if(!paths[paths_len-1].buf){
+        free(paths);
+        return 1;
+    }
+    strcpy(paths[paths_len-1].buf, texts[0]);
+    // printf("sqlite paths_len=%d: %s\n", paths_len, paths[paths_len-1].buf);
+
+    paths[paths_len].len = 0;
+    paths[paths_len].buf = NULL;
+
+    *storage_ptr = paths;
+
+    return 0;
+}
+int loaded_board_paths_len(struct mg_str* paths){
+    int i = 0;
+    while(paths[i].buf != NULL) i++;
+    return i;
+}
+struct mg_str* hot_load_board_paths(sqlite3* db){
+
+    struct mg_str* paths;
+
+    static char get_boards_sql[] = "SELECT path FROM board;";
+    int rc = sqlite3_exec(db, get_boards_sql, &hot_load_boards_callback, &paths, NULL);
+    if(rc) printf("SQLite exec error: %s\n", sqlite3_errmsg(db));
+    if(!paths) printf("Paths is still null.\n");
+    else {
+        int i = 0;
+        while(paths[i].buf != NULL){
+            
+            printf("Loaded i=%d: '/%s'\n", i, paths[i].buf);
+            i++;
+        }
+    }
+    return rc == 0 ? paths : NULL;
+}
+void free_loaded_board_paths(struct mg_str* paths){
+    int i = 0;
+    while(paths[i].len != 0){
+        free(paths[i].buf);
+        i++;
+    }
+    free(paths);
+}
+
 bool is_all_digit_or_low_case(char* str){
     int len = strlen(str);
     for(int i = 0; i < len; i++){

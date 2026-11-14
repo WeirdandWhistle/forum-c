@@ -7,10 +7,19 @@ static void ev_handler(struct mg_connection* c, int ev, void* ev_data);
 
 uint8_t* jwt_secret;
 sqlite3* db;
+int hot_paths_len;
+struct mg_str* hot_paths;
 int start_http_server(sqlite3* db_param, uint8_t* secret){
 
     jwt_secret = secret;
     db = db_param;
+
+    hot_paths = hot_load_board_paths(db);
+    if(hot_paths == NULL){
+        printf("failed to hot load board paths. exiting...\n");
+        return 1;
+    }
+    hot_paths_len = loaded_board_paths_len(hot_paths);
 
     mg_log_set(MG_LL_NONE);
 
@@ -20,6 +29,8 @@ int start_http_server(sqlite3* db_param, uint8_t* secret){
     for(;;){
         mg_mgr_poll(&mgr, 1000);
     }
+
+    free_loaded_board_paths(hot_paths);
 
     return 0;
 }
@@ -35,9 +46,7 @@ static void ev_handler(struct mg_connection* c, int ev, void* ev_data){
             status_code = auth_endpoint(c, hm, jwt_secret, caps[0]);
         } else if(mg_match(hm->uri, mg_str("/api/verify/*"), caps)){
             status_code = verify_endpoint(c, hm, jwt_secret, caps[0]);
-        }
-
-        if(mg_match(hm->uri, mg_str("/api#"), caps)){
+        } else if(mg_match(hm->uri, mg_str("/api/#"), caps)){
             struct mg_str* auth = mg_http_get_header(hm, "Authorization");
             struct mg_str jwt_token[2] = {0};
             
